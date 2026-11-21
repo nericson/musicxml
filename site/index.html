@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scorebridge · Finale to MusicXML</title>
+<meta name="description" content="Convert Finale MUS and MUSX scores, batches, or whole folders to MusicXML privately in your browser.">
+<meta name="theme-color" content="#263e73"><link rel="stylesheet" href="./style.css"><link rel="icon" href="./mark.png">
+</head><body>
+<header><div class="bar"><a class="brand" href="./"><img src="./mark.png" width="32" height="32" alt="">Scorebridge</a><nav aria-label="Page navigation"><a href="#guide">Conversion guide</a><a href="https://github.com/nericson/musicxml">GitHub</a></nav></div></header>
+<main>
+<section class="hero"><div><h1>Finale to <em>MusicXML</em></h1><p>Convert a single score, a batch of files, or an entire music library.</p></div><img class="cadence" src="./cadence.png" width="390" height="112" alt=""></section>
+<div class="desk">
+<section class="card sources" aria-labelledby="source-title"><div class="cardhead"><h2 id="source-title">Source files</h2><span class="format">.mus &nbsp;/&nbsp; .musx</span></div>
+<div id="drop"><div class="scoreicon" aria-hidden="true">♫</div><h3>Drop your Finale scores here</h3><p>Or choose files or a folder from your device.</p>
+<div class="choices"><button type="button" id="choose">Choose files</button><button type="button" id="folder" class="outline">Choose folder</button></div>
+<input hidden type="file" id="files" multiple><input hidden type="file" id="directory" webkitdirectory multiple></div>
+<div class="sourcefoot"><span><span aria-hidden="true">♩</span> No file handy?</span> <button id="example" class="textbutton">Try a sample score</button></div></section>
+<section class="card settings" aria-labelledby="export-title"><div class="cardhead"><h2 id="export-title">Export settings</h2></div>
+<div class="options"><label><input id="parts" type="checkbox" checked><span><strong>Include linked parts</strong><small>Save individual parts alongside the full score.</small></span></label>
+<label><input id="clean" type="checkbox" checked><span><strong>Clean notation</strong><small>Remove empty notation groups and flag repeated articulations by measure.</small></span></label>
+<details class="advanced"><summary>More options</summary><label><input id="dedupe" type="checkbox"><span>Remove identical simple articulations on the same note</span></label><label><input id="fonts" type="checkbox" checked><span>Keep original font choices</span></label></details>
+</div><div class="private"><span aria-hidden="true">●</span> Scores stay on this device.</div></section>
+</div>
+<section class="card queue" aria-labelledby="queue-title"><div class="cardhead"><div class="qtitle"><h2 id="queue-title">Conversion queue</h2><span id="count" class="count">0</span></div><div class="actions"><button id="clear" class="textbutton" hidden>Clear queue</button><button id="cancel" class="outline" hidden>Stop</button><button id="convert" disabled>Convert scores</button></div></div>
+<p class="status" id="status" role="status" aria-live="polite">Add scores to start a conversion.</p><progress hidden id="progress" aria-label="Scores processed"></progress><ol id="rows"></ol>
+<div class="downloads" hidden id="downloads"><button id="zip">Download ZIP</button><button class="outline" id="report">Download report</button></div></section>
+<section id="guide" aria-labelledby="guide-title"><h2 id="guide-title">Conversion guide</h2>
+<details><summary>What carries over to MusicXML?</summary><p>Scorebridge uses Denigma to read Finale notation, including pitches, rhythms, voices, lyrics, tempo changes, and layout where the reader supports them. Linked parts can carry part-specific settings. Complex engraving, playback, fonts, and older percussion mappings can differ in the receiving notation app. Compare important scores with an original print or PDF and retain the Finale files.</p></details>
+<details><summary>What does cleanup change?</summary><p>Cleanup removes empty, unmarked notation groups. Identical articulation marks on one note are listed in the report. You can opt to remove exact repeats of simple marks such as accents or staccatos. Hidden notes, cues, rests, voices, and expressive text retain their musical purpose and are left in place. If cleanup changes a score, its uncleaned MusicXML is also available for comparison.</p></details>
+<details><summary>How do folders and older files work?</summary><p>Use Choose folder to include nested folders. The ZIP keeps the folder structure and disambiguates matching output names. Extensionless legacy Finale files are recognized by their header. Unreadable files are identified individually while the rest of the batch continues.</p><p>Older MUS scores can use reference tables for percussion, playback, and text. Your browser requests these tables from the Denigma maintainer and verifies their checksums. If unavailable, the conversion uses reader defaults and records that choice in the report.</p></details>
+</section>
+</main><footer><div><span class="footbrand">Scorebridge</span><span>Powered by <a href="https://github.com/openmusx/denigma">Denigma</a></span><a href="./credits.html">Credits &amp; licenses</a></div></footer>
+<script type="module" src="./app.js"></script></body></html>
