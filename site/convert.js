@@ -3,6 +3,7 @@ export async function convertFile(file, settings, session, signal, onStage) {
   const bytes = await file.arrayBuffer();
   signal.throwIfAborted();
   const worker = new Worker(new URL('./vendor/worker.js',import.meta.url), {type:'module'});
+  let cancel;
   try {
     return await new Promise((resolve,reject) => {
       const warnings = [];
@@ -10,7 +11,7 @@ export async function convertFile(file, settings, session, signal, onStage) {
       let outputs = [0];
       let timer;
       function fail(reason) { clearTimeout(timer); reject(new Error(reason)); }
-      function cancel() { fail('Stopped.'); }
+      cancel = () => fail('Stopped.');
       function touch() {
         clearTimeout(timer);
         timer = setTimeout(() => fail('The converter stopped responding. Try this file separately.'), 180000);
@@ -52,7 +53,6 @@ export async function convertFile(file, settings, session, signal, onStage) {
             if (!d.success || !d.outputs.length) { fail(warnings.join('\n') || 'No MusicXML was produced.'); break; }
             if (d.resourceInfo.startsWith('Reader defaults') && session.resourceWarning) warnings.push(session.resourceWarning);
             clearTimeout(timer);
-            signal.removeEventListener('abort',cancel);
             resolve({outputs:d.outputs, warnings:[...new Set(warnings)], resources:d.resourceInfo}); break;
           case 'load-error': case 'worker-error': fail(d.message); break;
         }
@@ -60,5 +60,8 @@ export async function convertFile(file, settings, session, signal, onStage) {
       touch();
       worker.postMessage({type:'init',wasmModule:session.module});
     });
-  } finally { worker.terminate(); }
+  } finally {
+    if (cancel) signal.removeEventListener('abort', cancel);
+    worker.terminate();
+  }
 }

@@ -18,6 +18,7 @@ async function fetchBytes(url) {
   if (!r.ok) throw new Error(r.status + ' from ' + url);
   return Buffer.from(await r.arrayBuffer());
 }
+const engineArchiveName = 'denigma-45c3f626.zip';
 async function fromArchive(bytes) {
   if (createHash('sha256').update(bytes).digest('hex') !== archiveHash)
     throw new Error('Unexpected upstream artifact checksum.');
@@ -25,32 +26,31 @@ async function fromArchive(bytes) {
   try {
     const zip = join(directory, 'engine.zip');
     await writeFile(zip, bytes);
+    await writeFile(join(target, engineArchiveName), bytes);
     for (const name of ['denigma.js','denigma.wasm']) {
       const file = execFileSync('unzip', ['-p', zip, name], {maxBuffer:64 * 1024 * 1024});
       await writeFile(join(target,name), file);
     }
   } finally { await rm(directory, {recursive:true,force:true}); }
 }
-async function fromOfficialSite() {
-  const home = new URL('https://denigma.robertgpatterson.com/');
-  const manifest = JSON.parse(await fetchBytes(new URL('asset-manifest.json', home)));
-  if (!manifest.denigmaOnlineCommit || !'e1de95a5ec1e0f5d9e20aa877839a5fd6a7871ad'.startsWith(manifest.denigmaOnlineCommit))
-    throw new Error('Upstream website changed revisions.');
-  for (const [key,name] of [['wasm','denigma.wasm'],['module','denigma.js']]) {
-    const url = new URL(manifest[key], home);
-    if (url.origin !== home.origin) throw new Error('Unexpected engine host.');
-    await writeFile(join(target,name), await fetchBytes(url));
+async function acquireArchive() {
+  const urls = [
+    'https://musicxml.vercel.app/vendor/' + engineArchiveName,
+    'https://nightly.link/openmusx/denigma/actions/runs/43738266109/denigma-wasm.zip'
+  ];
+  const errors = [];
+  for (const url of urls) {
+    try { await fromArchive(await fetchBytes(url)); return; }
+    catch (e) { errors.push(e.message); }
   }
+  throw new Error(errors.join('\n'));
 }
 try {
   const local = await readFile(process.env.DENIGMA_ARCHIVE || 'engine/denigma-wasm.zip').catch(e => {
     if (e.code !== 'ENOENT' || process.env.DENIGMA_ARCHIVE) throw e;
   });
   if (local) await fromArchive(local);
-  else {
-    try { await fromArchive(await fetchBytes('https://nightly.link/openmusx/denigma/actions/runs/43738266109/denigma-wasm.zip')); }
-    catch(e) { console.log('Trying upstream published engine:',e.message); await fromOfficialSite(); }
-  }
+  else await acquireArchive();
   const create = (await import(pathToFileURL(resolve(target, 'denigma.js')))).default;
   const m = await create({ wasmBinary: await readFile(join(target, 'denigma.wasm')) });
   const builtFrom = m.UTF8ToString(m._denigma_commit()).replace(/-dirty$/, '');

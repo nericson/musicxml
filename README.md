@@ -1,6 +1,6 @@
 # Scorebridge · Finale to MusicXML
 
-A static, browser-local Finale converter. Choose one or more Finale scores, drop a folder, or use the folder picker to walk a collection. Run **Convert scores**, then download individual MusicXML files or a ZIP with the original folder hierarchy and a text report. **Try a sample score** loads a real single-note Finale 1.0 file.
+[Open Scorebridge](https://musicxml.vercel.app). A static, browser-local Finale converter. Choose one or more Finale scores, drop a folder, or use the folder picker to walk a collection. Run **Convert scores**, then download individual MusicXML files or a ZIP with the original folder hierarchy and a text report. **Try a sample score** loads a real single-note Finale 1.0 file.
 
 The score and each linked part are separate MusicXML documents. Settings preserve the document's pitch display, include playback tempos, and retain Finale rest positions. Original fonts are enabled by default. All conversion runs in a dedicated, disposable Web Worker, one input at a time. Additional legacy playback, percussion and font reference tables are fetched from the Denigma maintainer with omitted credentials and verified against pinned checksums. Source scores never leave the browser.
 
@@ -14,7 +14,7 @@ Denigma is under active development. Damaged, unsupported, or unusually large fi
 
 Use Node 22.12+ or 24 and an unzip utility. Run `npm run build`, then serve `dist/` over HTTP, for example with `python3 -m http.server --directory dist 8000`. Vercel runs the same build and publishes that directory. A static web server is sufficient. No accounts, database, API keys, server functions, or payment services are used.
 
-The build accepts a local verified upstream ZIP at `engine/denigma-wasm.zip` or `DENIGMA_ARCHIVE`. Otherwise it fetches the pinned upstream archive, with the matching published Denigma Online build as a fallback. The archive's SHA-256 is `df90c2d1bef67f1aedf85fd65810832feea920ca9c624e34cd0a0b7503a89760`. The build verifies the engine-reported revision and converts genuine test scores before publishing. Run `npm test` to repeat the checks against an existing build.
+The build accepts a local verified upstream ZIP at `engine/denigma-wasm.zip` or `DENIGMA_ARCHIVE`. Otherwise it fetches the checksum-verified archive from the deployed app or its original upstream build. [Download the pinned engine ZIP](https://musicxml.vercel.app/vendor/denigma-45c3f626.zip) to build offline. Every deployment carries this exact archive so rebuilding does not depend on GitHub Actions artifact retention. The archive's SHA-256 is `df90c2d1bef67f1aedf85fd65810832feea920ca9c624e34cd0a0b7503a89760`. The build verifies the engine-reported revision and converts genuine test scores before publishing. Run `npm test` to repeat the checks against an existing build.
 
 ## Sources
 
